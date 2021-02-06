@@ -5,7 +5,7 @@
  *
  */
 
-package com.giechaskiel.ilias.bluetoothserialfromtasker;
+package com.giechaskiel.ilias.bluetoothserialfromtasker_rks2000control;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -17,19 +17,21 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListPopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.twofortyfouram.locale.sdk.client.ui.activity.AbstractPluginActivity;
 
 import net.dinglisch.android.tasker.TaskerPlugin;
 
+import java.util.Objects;
 import java.util.Set;
 
-import static com.giechaskiel.ilias.bluetoothserialfromtasker.BundleManager.BUNDLE_STRING_MAC;
-import static com.giechaskiel.ilias.bluetoothserialfromtasker.BundleManager.BUNDLE_STRING_MSG;
+import static com.giechaskiel.ilias.bluetoothserialfromtasker_rks2000control.BundleManager.BUNDLE_STRING_MAC;
+import static com.giechaskiel.ilias.bluetoothserialfromtasker_rks2000control.BundleManager.BUNDLE_STRING_MSG;
 
 
 public final class PluginActivity extends AbstractPluginActivity {
@@ -61,7 +63,7 @@ public final class PluginActivity extends AbstractPluginActivity {
                 mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                 if (mBluetoothAdapter == null) {
                     Context context = getApplicationContext();
-                    String msg = context.getResources().getString(R.string.bluetooth_error);
+                    String msg = "Bluetooth does not supported on this device";
                     Log.w(TAG, msg);
                     Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
                     return;
@@ -130,31 +132,40 @@ public final class PluginActivity extends AbstractPluginActivity {
     @Override
     public void onPostCreateWithPreviousResult(Bundle bundle, String s) {
         final String mac = BundleManager.getMac(bundle);
+        final String command = BundleManager.getMsg(bundle);
         macText.setText(mac);
 
-        final String msg = BundleManager.getMsg(bundle);
-        ((EditText) findViewById(R.id.msg)).setText(msg);
+        RadioGroup rgCommands = ((RadioGroup) findViewById(R.id.rgCommands));
 
-        final boolean crlf = BundleManager.getCrlf(bundle);
-        ((CheckBox) findViewById(R.id.crlf_checkbox)).setChecked(crlf);
-
-        final boolean hex = BundleManager.getHex(bundle);
-        ((CheckBox) findViewById(R.id.hex_checkbox)).setChecked(hex);
+        for (int i = 0; i < rgCommands.getChildCount(); i++)
+        {
+            RadioButton rb = (RadioButton) rgCommands.getChildAt(i);
+            if (Objects.equals(rb.getTag().toString(), command))
+            {
+                rb.setChecked(true);
+                break;
+            }
+        }
     }
 
     // Method that returns the bundle to be saved
     @Override
     public Bundle getResultBundle() {
         String mac = macText.getText().toString();
-        String msg = ((EditText) findViewById(R.id.msg)).getText().toString();
-        boolean crlf = ((CheckBox) findViewById(R.id.crlf_checkbox)).isChecked();
-        boolean hex = ((CheckBox) findViewById(R.id.hex_checkbox)).isChecked();
+        String msg = null;
+        RadioGroup rgCommands = ((RadioGroup) findViewById(R.id.rgCommands));
+        int rbCheckedId = rgCommands.getCheckedRadioButtonId();
+        if (rbCheckedId > 0)
+        {
+            RadioButton rbChecked = ((RadioButton) findViewById(rbCheckedId));
+            msg = rbChecked.getTag().toString();
+        }
 
-        Bundle bundle = BundleManager.generateBundle(mac, msg, crlf, hex);
+        Bundle bundle = BundleManager.generateBundle(mac, msg);
 
         if (bundle == null) {
             Context context = getApplicationContext();
-            String error = BundleManager.getErrorMessage(context, mac, msg, crlf, hex);
+            String error = BundleManager.getErrorMessage(context, mac, msg);
             if (error != null) {
                 Toast.makeText(context, error, Toast.LENGTH_LONG).show();
             } else {

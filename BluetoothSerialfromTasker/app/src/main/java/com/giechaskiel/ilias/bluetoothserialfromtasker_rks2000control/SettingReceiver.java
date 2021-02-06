@@ -5,7 +5,7 @@
  *
  */
 
-package com.giechaskiel.ilias.bluetoothserialfromtasker;
+package com.giechaskiel.ilias.bluetoothserialfromtasker_rks2000control;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -143,13 +143,42 @@ public class SettingReceiver extends AbstractPluginSettingReceiver {
         final String mac = BundleManager.getMac(bundle);
         BluetoothDevice device = getBluetoothDevice(mac);
         if (device == null) {
-            return;
+            throw new RuntimeException("Error during RKS-2000 command: device disconnected");
         }
 
         BluetoothSocket socket = getConnectedSocket(device);
 
         if (socket == null) {
-            return;
+            throw new RuntimeException("Error during RKS-2000 command: cannot open socket");
+        }
+
+        int timeoutMilliseconds = 10000;
+        int elapsed = 0;
+        int step = 200;
+        while (!socket.isConnected() || elapsed <= timeoutMilliseconds) {
+            try {
+                Thread.sleep(step);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Error waiting for connection", e);
+                closeSocket(socket);
+                throw new RuntimeException("Error during RKS-2000 command: error waiting for connection");
+            }
+            elapsed += step;
+        }
+
+        if (!socket.isConnected())
+        {
+            Log.e(TAG, "Socket connection timeout");
+            closeSocket(socket);
+            throw new RuntimeException("Error during RKS-2000 command: connection failed");
+        }
+
+        try {
+            Thread.sleep(1000); // Necessary sleep because of RKS-2000 returns error if command will be send just after connection
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Error waiting for connection", e);
+            closeSocket(socket);
+            throw new RuntimeException("Error during RKS-2000 command: error waiting for connection");
         }
 
         byte[] bytes = BundleManager.getMsgBytes(bundle);
@@ -160,12 +189,14 @@ public class SettingReceiver extends AbstractPluginSettingReceiver {
                 out.flush();
             } catch (IOException e) {
                 Log.e(TAG, "Error writing to output stream", e);
+                throw new RuntimeException("Error during RKS-2000 command: cannot write command");
             }
 
             Log.i(TAG, "Sent message successfully");
         } else {
             // this can happen, for instance, if string replacement of hex is incorrect
             Log.e(TAG, "Got null bytes, so did not send message");
+            throw new RuntimeException("Error during RKS-2000 command: command empty");
         }
 
         closeSocket(socket);

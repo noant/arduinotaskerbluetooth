@@ -5,7 +5,7 @@ android {
     buildToolsVersion '26.0.2'
 
     defaultConfig {
-        applicationId "com.giechaskiel.ilias.bluetoothserialfromtasker"
+        applicationId "com.giechaskiel.ilias.bluetoothserialfromtasker_rks2000control"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 4

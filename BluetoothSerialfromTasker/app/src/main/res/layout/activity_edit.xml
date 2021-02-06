@@ -10,43 +10,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:hint="@string/mac_hint" />
-
-    <EditText
-        android:id="@+id/msg"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:hint="@string/message_hint" />
-
-    <CheckBox
-        android:id="@+id/crlf_checkbox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/crlf_message"
-        android:layout_gravity="center_horizontal"
-        android:checked="true" />
-
-    <CheckBox
-        android:id="@+id/hex_checkbox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hex_message"
-        android:layout_gravity="center_horizontal"
-        android:checked="false" />
+        android:hint="00:11:22:AA:BB:CC (Paired MAC Address)" />
 
     <Button
+        android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/button_message"
-        android:id="@+id/button"
-        android:clickable="true"
         android:layout_gravity="center_horizontal"
-        android:maxLength="500" />
+        android:clickable="true"
+        android:maxLength="500"
+        android:text="Show all paired devices" />
+
+    <RadioGroup
+        android:id="@+id/rgCommands"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RadioButton
+            android:id="@+id/rbEnableBatteryPriority"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:tag="eco=1"
+            android:text="Turn on battery priority" />
+
+        <RadioButton
+            android:id="@+id/rbDisableBatteryPriority"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:tag="eco=0"
+            android:text="Turn off battery priority" />
+    </RadioGroup>
 
 
 </LinearLayout>
